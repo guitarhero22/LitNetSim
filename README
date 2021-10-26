@@ -1,6 +1,4 @@
-
 Note that we assume the version of go-ethereum is 1.9.3, solidity 0.4.25
-
 
 1. Run following command to install the requried things (if not already installed)
 sh installGo.sh
