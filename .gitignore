@@ -1,2 +1,5 @@
 #python venv
 eth/
+eth-test-net/data
+.vscode
+solc*

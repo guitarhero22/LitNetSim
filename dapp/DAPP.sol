@@ -2,186 +2,161 @@ pragma solidity ^0.4.25;
 
 contract DAPP {
     struct User {
-        uint id;
+        uint id; 
         uint bal;
+        string name;
+
         uint[] neighbours;
         mapping (uint => int) account;
     }
 
     mapping (uint => User) users;
+    mapping (uint => bool) visited;
     uint[] userIds;
+    int[1000] public _path; //for debugging
+    string public answer = ""; // for debugging
 
-    function checkIfUserExists(uint id) internal view returns (bool) {
-        for(uint i = 0; i < userIds.length; ++i){
-            if (userIds[i] == id) return true;
+    constructor() public {
+        _path[0] = -1;
+    }
+
+    function userExists(uint id) internal view returns (bool) {
+        for(uint i = 0; i < userIds.length; ++i) {
+            if(userIds[i] == id) return true;
         }
         return false;
     }
 
-   function checkIfAccountExists(uint id1, uint id2) internal view returns (bool) {
-        User memory user1 = users[id1];
-        User memory user2 = users[id2];
-        uint i = 0;
-        for(i = 0; i < user1.neighbours.length; ++i){
-            if(id1 == user1.neighbours[i]) {
-                return true;
-            }
-        }
-        for(i = 0; i < user2.neighbours.length; ++i){
-            if(id2 == user2.neighbours[i]) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    function registerUser(uint id) payable public {
-        if(checkIfUserExists(id)){
-            revert("ID already Taken");
-            return;
+    function registerUser(uint id, string uname) public {
+        if(userExists(id)) {
+            revert("User already registered");
         }
 
         userIds.push(id);
+
         User memory user;
-        user.id = id;
+        user.id=id;
         user.bal = 0;
-
+        user.name = uname;
         users[id] = user;
-        return;
+
+        visited[id] = false;
     }
 
-    function creatAcc(uint id1 , uint id2) payable public {
-        if(!checkIfUserExists(id1) || !checkIfUserExists(id2)){
-            revert("One of the Users Not registered");
-            return;
+    function createAcc(uint id1, uint id2) public {
+        if(!userExists(id1) || !userExists(id2)){
+            revert("One of the users does not exist");
         }
 
-        if(checkIfAccountExists(id1, id2)){
-            revert("Account Already Exists");
-            return;
-        }
-
-        users[id1].neighbours.push(id2);
-        users[id2].neighbours.push(id1);
-        users[id1].account[id2] = 0;
-        users[id2].account[id2] = 0;
+        addNeighbour(id1, id2);
+        addNeighbour(id2, id1);
     }
-}
 
-/**
-    library UintSet {
+    function addNeighbour(uint uid, uint acc) internal {
+        User storage u = users[uid];
 
-        struct SetStorage {
-            uint data;
-            int l; 
-            int r;
-        }
-
-        struct Set {
-            // SetStorage[] store;
-            uint[] data;
-            int[] l; 
-            int[] r;
-            uint sz;
-        }
-
-        function insert(uint[] set, int[] l, int[] r, uint sz, uint root, uint n) public view returns (uint){
-
-            if(sz == 0){
-                sz ++;
-                set[sz - 1] = n;
-                r[sz - 1] = -1;
-                l[sz - 1] = -1;
-                return sz;
-            }
-
-            if(set[root] == n) return sz;
-
-            if(set[root] < n){
-                if(l[root] == -1){
-                    sz ++;
-                    set[sz - 1] = n;
-                    r[sz - 1] = -1;
-                    l[sz - 1] = -1;
-                    l[root] = int(sz - 1);
-                    return sz;
-                }
-                return insert(set, l, r, sz, uint(l[root]), n);
-            }else{
-                if(r[root] == -1){
-                    sz ++;
-                    set[sz - 1] = n;
-                    r[sz - 1] = -1;
-                    l[sz - 1] = -1;
-                    r[root] = int(sz - 1);
-                    return sz;
-                }
-                return insert(set, l, r, sz, uint(r[root]), n);
-            }
-
-            return sz;
-        }
-
-        // function find(Set set, int r, uint f) public view returns (bool){
-        function find(uint[] set, int[] l, int[] r, uint sz, uint root, uint f) public view returns (bool){
-            if(sz == 0) return false;
-
-            if(f == set[root]) return true;
-
-            if(f < set[root]){
-                if(l[root] != -1){
-                    return find(set, l, r, sz, uint(l[root]), f);
-                }
-                return false; 
-            }else{
-                if(r[root] != -1){
-                    return find(set, l, r, sz, uint(r[root]), f);
-                }
-                return false;
-            }
-        }
-
-    }
-*/
-
-/** 
-    function findShortestPath(uint from, uint to) internal view returns (int[1001]){
-
-        intPairUint[1001] memory Q;
         uint i = 0;
-        uint j = 0;
+        for(i = 0; i < u.neighbours.length; ++i) {
+            if(u.neighbours[i] == acc) return;
+        }
+        u.neighbours.push(acc);
+        u.account[acc] = 0;
+    }
 
-        Q[j++] = intPairUint(from, int(-1));
-        UintSet.Set memory set;
-        UintSet.insert(set.data, set.l, set.r, set.sz, 0, from);
+    function showUsers() public view returns (uint[]) {
+        return userIds;
+    }
 
-        int ans = -1;
-        while(i < j){
-            if(to == Q[i].Q) {
-                ans = int(i);
+    function showUserNeighbours(uint id) public view returns (uint[]) {
+        if(!userExists(id)){
+            revert("User does not exist");
+        }
+        return users[id].neighbours;
+    }
+
+    function showUserName(uint id) public view returns (string) {
+        if(!userExists(id)){
+            revert("User does not exist");
+        }
+        return users[id].name;
+    }
+
+    function shortestPath(uint from, uint to) public returns (bool){
+        
+        uint[] memory pth = new uint[](userIds.length);
+        uint[] memory Q = new uint[](userIds.length);
+        int[] memory P = new int[](userIds.length);
+        uint[4] memory data = [0, 0, 0, to];
+
+        uint id = 0;
+        for(id = 0; id < userIds.length; ++id){
+            visited[userIds[id]] = false;
+        }
+        visited[from] = true;
+        Q[data[2]++] = from;
+        P[data[2]-1] = -1;
+
+        while(data[1] < data[2]) {
+            if(exploreNode(Q, P, data)){
                 break;
             }
-
-            for(uint k = 0; k < users[Q[i].Q].neighbours.length; ++k){
-                if(UintSet.find(set.data, set.l, set.r, set.sz, 0, users[Q[i].Q].neighbours[k])) continue;
-
-                UintSet.insert(set.data, set.l, set.r, set.sz, 0, users[Q[i].Q].neighbours[k]);
-                Q[j++] = intPairUint(users[Q[i].Q].neighbours[k], int(i));
-            }
-
-            i++;
         }
 
-        int[1001] memory path;
-        i = 0;
-        while(ans > 0){
-            path[i++] = int(Q[uint(ans)].Q);
-            ans = Q[uint(ans)].p;
+        // if(data[1] >= data[2]) return false;
+        if(preparePath(pth, Q, P, data)){
+            answer = "good";
+        }else{
+            answer = "bad";
         }
-        path[i++] = -1;
-        return path;
+        putPathInGlobal(pth, data);
+        return true;
     }
 
+    function exploreNode(uint[] memory Q, int[] memory P, uint[4] memory data) internal returns (bool) {
+        if(Q[data[1]] == data[3]) return true;
 
-*/
- 
+        uint cur = Q[data[1]++];
+        uint i = 0;
+        for(i = 0; i < users[cur].neighbours.length; ++i){
+            if(!visited[users[cur].neighbours[i]]){
+                visited[users[cur].neighbours[i]]=true;
+                Q[data[2]++] = users[cur].neighbours[i];
+                P[data[2]-1] = int(data[1]-1);
+            }
+        }
+
+        return false;
+    }
+
+    function putPathInGlobal(uint[] memory path, uint[4] memory data) internal {
+        uint i = 0;
+        for(i = 0; i < data[0]; ++i){
+            _path[i] = int(path[i]);
+        }
+        _path[i] = -1;
+    }
+
+    function path_() public view returns (int[]) {
+        uint sz = 0;
+        while(sz < _path.length && _path[sz] >= 0) sz++;
+
+        int[] memory ret = new int[](sz);
+        for(sz = 0; sz < ret.length; ++sz){
+            ret[sz] = _path[sz];
+        }
+        return ret;
+    }
+
+    function preparePath(uint[] path, uint[] memory Q, int[] memory P, uint[4] memory data) internal pure returns (bool) {
+        if(data[1] >= Q.length) return false;
+        if(data[1] >= data[2]) return false;
+
+        int node = int(data[1]);
+        while(node >= 0){
+            path[data[0]++] = Q[uint(node)];
+            node = P[uint(node)];
+        }
+
+        return true;
+    }
+}
