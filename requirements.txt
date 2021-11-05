@@ -1,2 +1,2 @@
-py-solcx
+py-solc-x
 web3

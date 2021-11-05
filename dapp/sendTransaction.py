@@ -33,7 +33,6 @@ def sendEmptyLoopTransaction(address):
 print("Starting Transaction Submission")
 w3 = Web3(IPCProvider(os.environ['HOME']+'/HW3/test-eth1/geth.ipc', timeout=100000))
 
-
 i=0
 
 while i < 1:

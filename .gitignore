@@ -3,3 +3,4 @@ eth/
 eth-test-net/data
 .vscode
 solc*
+dapp/credentials.py
