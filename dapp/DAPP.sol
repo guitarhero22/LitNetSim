@@ -85,7 +85,7 @@ contract DAPP {
         uint[] memory pth = new uint[](userIds.length);
         uint[] memory Q = new uint[](userIds.length);
         int[] memory P = new int[](userIds.length);
-        uint[4] memory data = [0, 0, 0, to];
+        uint[5] memory data = [0, 0, 0, to, amount];
 
         uint id = 0;
         for(id = 0; id < userIds.length; ++id){
@@ -188,7 +188,7 @@ contract DAPP {
         uint[] memory pth = new uint[](userIds.length);
         uint[] memory Q = new uint[](userIds.length);
         int[] memory P = new int[](userIds.length);
-        uint[4] memory data = [0, 0, 0, to];
+        uint[5] memory data = [0, 0, 0, to, 0];
 
         uint id = 0;
         for(id = 0; id < userIds.length; ++id){
@@ -213,13 +213,13 @@ contract DAPP {
         return true;
     }
 
-    function exploreNode(uint[] memory Q, int[] memory P, uint[4] memory data) internal returns (bool) {
+    function exploreNode(uint[] memory Q, int[] memory P, uint[5] memory data) internal returns (bool) {
         if(Q[data[1]] == data[3]) return true;
 
         uint cur = Q[data[1]++];
         uint i = 0;
         for(i = 0; i < users[cur].neighbours.length; ++i){
-            if(!visited[users[cur].neighbours[i]]){
+            if(!visited[users[cur].neighbours[i]] && users[cur].account[users[cur].neighbours[i]] >= data[4]){
                 visited[users[cur].neighbours[i]]=true;
                 Q[data[2]++] = users[cur].neighbours[i];
                 P[data[2]-1] = int(data[1]-1);
@@ -229,7 +229,7 @@ contract DAPP {
         return false;
     }
 
-    function preparePath(uint[] path, uint[] memory Q, int[] memory P, uint[4] memory data) internal pure returns (bool) {
+    function preparePath(uint[] path, uint[] memory Q, int[] memory P, uint[5] memory data) internal pure returns (bool) {
         if(data[1] >= Q.length) return false;
         if(data[1] >= data[2]) return false;
 
@@ -275,7 +275,7 @@ contract DAPP {
         return ret;
     }
 
-    function putPathInGlobal(uint[] memory path, uint[4] memory data) internal {
+    function putPathInGlobal(uint[] memory path, uint[5] memory data) internal {
         uint i = 0;
         for(i = 0; i < data[0]; ++i){
             _path[i] = int(path[i]);
