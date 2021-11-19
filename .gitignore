@@ -5,3 +5,4 @@ eth-test-net/data
 solc*
 dapp/credentials.py
 __pycache__
+.python-version
