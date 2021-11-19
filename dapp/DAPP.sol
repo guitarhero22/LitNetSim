@@ -9,15 +9,19 @@ contract DAPP {
         uint[] neighbours;
         mapping (uint => uint) account;
     }
-
+    uint[] public userIds;
+    int[1001] public _path; //for debugging
+    string public answer = ""; // for debugging
     mapping (uint => User) public users;
     mapping (uint => bool) public visited;
-    uint[] public userIds;
-    int[1000] public _path; //for debugging
-    string public answer = ""; // for debugging
-
+    
     constructor() public {
         _path[0] = -1;
+        _path[1000] = 0;
+    }
+
+    function getSuccessfulTransactions() public view  returns (int){
+        return _path[1000];
     }
 
     function registerUser(uint id, string uname) public {
@@ -36,13 +40,13 @@ contract DAPP {
         visited[id] = false;
     }
 
-    function createAcc(uint id1, uint id2) public {
+    function createAcc(uint id1, uint id2, uint balance) public {
         if(!userExists(id1) || !userExists(id2)){
             revert("One of the users does not exist");
         }
 
-        addNeighbour(id1, id2);
-        addNeighbour(id2, id1);
+        addNeighbour(id1, id2, balance/2);
+        addNeighbour(id2, id1, balance/2);
     }
 
     function closeAccount(uint id1, uint id2) public {
@@ -111,6 +115,7 @@ contract DAPP {
         if(!transferAmount(pth, data[0], amount)){
             revert("Invalid Transaction");
         }
+        _path[1000] += 1;
         return;
     }
     
@@ -172,7 +177,7 @@ contract DAPP {
         return users[id].neighbours;
     }
 
-    function addNeighbour(uint uid, uint acc) internal {
+    function addNeighbour(uint uid, uint acc, uint balance) internal {
         User storage u = users[uid];
 
         uint i = 0;
@@ -180,7 +185,7 @@ contract DAPP {
             if(u.neighbours[i] == acc) return;
         }
         u.neighbours.push(acc);
-        u.account[acc] = 0;
+        u.account[acc] = balance;
     }
 
     function shortestPath(uint from, uint to) public returns (bool){

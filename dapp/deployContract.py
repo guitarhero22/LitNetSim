@@ -43,7 +43,6 @@ def deployContracts(w3, account):
         time.sleep(1)
         receipt3 = w3.eth.getTransactionReceipt(tx_hash3)
 
-    w3.miner.stop()
 
     
     if receipt3 is not None:

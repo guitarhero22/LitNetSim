@@ -1,6 +1,7 @@
 import numpy as np
 import graphviz
-
+from .connector import DAPPConnector
+import math
 class Graph(object):
 
     def __init__(self, m=2, num_nodes=100, num_initial_nodes=2, exp_mean=10):
@@ -12,6 +13,12 @@ class Graph(object):
         self.edges = 0
         self.m = m
         self.exp_mean = exp_mean
+        self.conn = DAPPConnector()
+        self.conn.deploy_dapp_contract()
+    
+    def init_nodes(self):
+        for i in range(self.num_nodes):
+            self.conn.register_user(i, f"node {i}")
         
     def __init_barabasi(self):
 
@@ -24,6 +31,7 @@ class Graph(object):
             for j in range(i+1, self.num_initial_nodes):
                 print(f"I, j, {i} {j}")
                 self.__add_edge(i, j)
+                
 
 
     def __add_edge(self, i: int, j: int):
@@ -44,8 +52,13 @@ class Graph(object):
         self.deg[j] += 1
 
         self.edges += 1
-
         bal = np.random.exponential(self.exp_mean)
+        bal = int(math.round(bal))
+        if bal%2 == 1:
+            bal += 1
+
+        self.conn.create_acc(i, j, bal)
+
         self.balance[i][j] = bal/2
         self.balance[j][i] = bal/2
 
@@ -101,19 +114,15 @@ class Graph(object):
         s2 = s1
         while s2 == s1:
             s2 = np.random.randint(0, self.num_nodes)
+        
+        self.send_amount()
     
     def transaction(self):
         pass
         
 
-
-        
-
-
-
 if __name__ == "__main__":
     graph = Graph(num_nodes=20)
-
     graph.barabasi_algorithm()
     graph.generate_graph()
     pass
