@@ -1,84 +1,60 @@
-import sys 
 import os
-
+import time
 from .credentials import public_key, private_key
 
-from solcx import compile_source
+from solc import compile_source
 from web3 import *
 
 contract_path = os.path.join(os.path.dirname(__file__), 'DAPP.sol')
 
-print("contract Path:", contract_path)
+def compile_source_file(file_path):
+   with open(file_path, 'r') as f:
+      source = f.read()
+   return compile_source(source)
 
-# import sys
-# import time
-# import pprint
-
-# from web3 import *
-# from solc import compile_source
-# import os
-
-# def maximum(a, b, c): 
-  
-#     if (a >= b) and (a >= b): 
-#         largest = a 
-  
-#     elif (b >= a) and (b >= a): 
-#         largest = b 
-#     else: 
-#         largest = c 
-          
-#     return largest
+def read_address_file(file_path):
+    file = open(file_path, 'r')
+    addresses = file.read().splitlines() 
+    return addresses
 
 
-# k = 10
-# def compile_source_file(file_path):
-#    with open(file_path, 'r') as f:
-#       source = f.read()
-#    return compile_source(source)
-
-# def read_address_file(file_path):
-#     file = open(file_path, 'r')
-#     addresses = file.read().splitlines() 
-#     return addresses
-
-
-# def connectWeb3():
-#     # print(os.environ['HOME']+'/HW3/test-eth1/geth.ipc')
-#     return Web3(IPCProvider(os.environ['HOME']+'/HW3/test-eth1/geth.ipc', timeout=100000))
+def connectWeb3():
+    return Web3(IPCProvider(os.environ['HOME']+'/L2-DAPP/eth-test-net/data/geth.ipc', timeout=100000))
     
+abi = None
+def deployEmptyContract(contract_source_path, w3, account):
+    global abi
+    compiled_sol = compile_source_file(contract_source_path)
+    contract_id, contract_interface3 = compiled_sol.popitem()
+    abi = contract_interface3['abi']
+    curBlock = w3.eth.getBlock('latest')
+    tx_hash = w3.eth.contract(
+            abi=contract_interface3['abi'],
+            bytecode=contract_interface3['bin']).constructor().transact({'txType':"0x0", 'from':account, 'gas':1000000})
+    return tx_hash
 
-
-# def deployEmptyContract(contract_source_path, w3, account):
-#     compiled_sol = compile_source_file(contract_source_path)
-#     contract_id, contract_interface3 = compiled_sol.popitem()
-#     curBlock = w3.eth.getBlock('latest')
-#     tx_hash = w3.eth.contract(
-#             abi=contract_interface3['abi'],
-#             bytecode=contract_interface3['bin']).constructor(4).transact({'txType':"0x0", 'from':account, 'gas':1000000})
-#     return tx_hash
-
-# def deployContracts(w3, account):
-#     tx_hash3 = deployEmptyContract(empty_source_path, w3, account)
+def deployContracts(w3, account):
+    tx_hash3 = deployEmptyContract(empty_source_path, w3, account)
 
     
-#     receipt3 = w3.eth.getTransactionReceipt(tx_hash3)
+    receipt3 = w3.eth.getTransactionReceipt(tx_hash3)
 
-#     while ((receipt3 is None)) :
-#         time.sleep(1)
-#         receipt3 = w3.eth.getTransactionReceipt(tx_hash3)
+    while ((receipt3 is None)) :
+        time.sleep(1)
+        receipt3 = w3.eth.getTransactionReceipt(tx_hash3)
 
-#     w3.miner.stop()
+    w3.miner.stop()
 
     
-#     if receipt3 is not None:
-#         print("empty:{0}".format(receipt3['contractAddress']))
+    if receipt3 is not None:
+        print("empty:{0}".format(receipt3['contractAddress']))
+        return receipt3
 
 
-# empty_source_path = os.environ['HOME']+'/HW3/emptyLoop.sol'
+empty_source_path = contract_path
 
 
-# w3 = connectWeb3()
-# w3.miner.start(1)
-# time.sleep(4)
-# deployContracts(w3, w3.eth.accounts[0])
+w3 = connectWeb3()
+w3.miner.start(1)
+time.sleep(4)
+receipt3 = deployContracts(w3, w3.eth.accounts[0])
