@@ -24,7 +24,7 @@ contract DAPP {
         return _path[1000];
     }
 
-    function registerUser(uint id, string uname) public {
+    function registerUser(uint id, string memory uname) public {
         if(userExists(id)) {
             revert("User already registered");
         }
@@ -85,7 +85,8 @@ contract DAPP {
 
     }
 
-    function sendAmount(uint from , uint to, uint amount) public {
+    function sendAmount(uint from , uint to) public {
+        uint amount = 1;
         uint[] memory pth = new uint[](userIds.length);
         uint[] memory Q = new uint[](userIds.length);
         int[] memory P = new int[](userIds.length);
@@ -142,7 +143,7 @@ contract DAPP {
         return found;
     }
 
-    function showUsers() public view returns (uint[]) {
+    function showUsers() public view returns (uint[] memory) {
         return userIds;
     }
 
@@ -170,7 +171,7 @@ contract DAPP {
         return;
     }
 
-    function showUserNeighbours(uint id) public view returns (uint[]) {
+    function showUserNeighbours(uint id) public view returns (uint[] memory) {
         if(!userExists(id)){
             revert("User does not exist");
         }
@@ -234,7 +235,7 @@ contract DAPP {
         return false;
     }
 
-    function preparePath(uint[] path, uint[] memory Q, int[] memory P, uint[5] memory data) internal pure returns (bool) {
+    function preparePath(uint[] memory path, uint[] memory Q, int[] memory P, uint[5] memory data) internal pure returns (bool) {
         if(data[1] >= Q.length) return false;
         if(data[1] >= data[2]) return false;
 
@@ -269,7 +270,7 @@ contract DAPP {
         return true;
     }
 
-    function path_() public view returns (int[]) {
+    function path_() public view returns (int[] memory) {
         uint sz = 0;
         while(sz < _path.length && _path[sz] >= 0) sz++;
 

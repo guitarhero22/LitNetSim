@@ -1,7 +1,9 @@
 import numpy as np
 import graphviz
 from .connector import DAPPConnector
-import math
+import time
+import pickle
+
 class Graph(object):
 
     def __init__(self, m=2, num_nodes=100, num_initial_nodes=2, exp_mean=10):
@@ -53,7 +55,7 @@ class Graph(object):
 
         self.edges += 1
         bal = np.random.exponential(self.exp_mean)
-        bal = int(math.round(bal))
+        bal = int(round(bal))
         if bal%2 == 1:
             bal += 1
 
@@ -107,7 +109,7 @@ class Graph(object):
                     str(self.balance[node1][node2] + self.balance[node2][node1])
                 )
         
-        dot.render('data/payment-channel.gv', view=False)
+        dot.render('result/payment-channel.gv', view=False)
     
     def transact(self):
         s1 = np.random.randint(0, self.num_nodes)
@@ -115,15 +117,34 @@ class Graph(object):
         while s2 == s1:
             s2 = np.random.randint(0, self.num_nodes)
         
-        self.send_amount()
+        self.conn.send_amount(s1, s2)
     
-    def transaction(self):
-        pass
+    def transactions(self, num_transactions=1000, num_steps=100):
+        succ_percentage = []
+
+        for i in range(num_transactions):
+            self.transact()
+            if i % num_steps == num_steps -1:
+                print(f"Step {i+1}")
+                time.sleep(60)
+                print(f"% Successful transactions = {self.conn.get_successful_transactions()/(i+1)}")
+
+                succ_percentage.append(self.conn.get_successful_transactions()/(i+1))
+            else:
+                time.sleep(0.1)
+
+        return succ_percentage
         
 
 if __name__ == "__main__":
     graph = Graph(num_nodes=20)
+    graph.init_nodes()
+    time.wait(60)
     graph.barabasi_algorithm()
+    succ_percentage = graph.transactions()
+    with open("result.pkl", "wb") as fp:   #Pickling
+        pickle.dump(succ_percentage, fp)
     graph.generate_graph()
+
     pass
 
