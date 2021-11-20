@@ -1,7 +1,6 @@
 from web3 import Web3
 from solcx import compile_source, set_solc_version
 import os
-from .credentials import public_key, private_key
 import time
 set_solc_version('0.4.25')
 

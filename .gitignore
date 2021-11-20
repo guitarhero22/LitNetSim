@@ -1,9 +1,9 @@
 #python venv
 eth/
-eth-test-net/data
+eth-test-net/data/*
+!eth-test-net/data/keystore/
 .vscode
 solc*
 dapp/credentials.py
 __pycache__
 .python-version
-result/
