@@ -31,7 +31,6 @@ class Graph(object):
     
         for i in range(self.num_initial_nodes):
             for j in range(i+1, self.num_initial_nodes):
-                print(f"I, j, {i} {j}")
                 self.__add_edge(i, j)
                 
 
@@ -46,9 +45,7 @@ class Graph(object):
             raise Exception(f"{j} {i} incomplete graph 2")
 
         self.adj_matrix[i].append(j)
-        print(self.adj_matrix)
         self.adj_matrix[j].append(i)
-        print(self.adj_matrix)
 
         self.deg[i] += 1
         self.deg[j] += 1
@@ -59,7 +56,7 @@ class Graph(object):
         if bal%2 == 1:
             bal += 1
 
-        self.conn.create_acc(i, j, bal)
+        self.conn.create_acc(int(i), int(j), int(bal))
 
         self.balance[i][j] = bal/2
         self.balance[j][i] = bal/2
@@ -78,7 +75,6 @@ class Graph(object):
                 old_nodes_adj.append(node)
         
         for node in old_nodes_adj:
-            print(self.adj_matrix[new_node])
             self.__add_edge(node, new_node)
 
     def barabasi_algorithm(self):
@@ -117,7 +113,7 @@ class Graph(object):
         while s2 == s1:
             s2 = np.random.randint(0, self.num_nodes)
         
-        self.conn.send_amount(s1, s2)
+        self.conn.send_amount(int(s1), int(s2))
     
     def transactions(self, num_transactions=1000, num_steps=100):
         succ_percentage = []
@@ -126,7 +122,7 @@ class Graph(object):
             self.transact()
             if i % num_steps == num_steps -1:
                 print(f"Step {i+1}")
-                time.sleep(60)
+                time.sleep(5)
                 print(f"% Successful transactions = {self.conn.get_successful_transactions()/(i+1)}")
 
                 succ_percentage.append(self.conn.get_successful_transactions()/(i+1))
@@ -137,9 +133,9 @@ class Graph(object):
         
 
 if __name__ == "__main__":
-    graph = Graph(num_nodes=20)
+    graph = Graph()
     graph.init_nodes()
-    time.wait(60)
+    time.sleep(5)
     graph.barabasi_algorithm()
     succ_percentage = graph.transactions()
     with open("result.pkl", "wb") as fp:   #Pickling
