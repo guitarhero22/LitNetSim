@@ -139,7 +139,7 @@ class DAPPConnector(object):
     def __update_transaction_status(self, tx_hash: str):
         self.unchecked_hashes.append(tx_hash)
 
-        if len(self.unchecked_hashes) >= 100:
+        if len(self.unchecked_hashes) >= self.num_bulk_transaction:
             self.check_unchecked_transactions()
 
     
@@ -219,62 +219,6 @@ class DAPPConnector(object):
         int
             Number of successful transactions'''
         return self.contract.functions.getSuccessfulTransactions().call()
-
-if __name__ == "__main__":
-    print("Compiling contract")
-    conn = DAPPConnector()
-    print("Deploying Contract")
-    conn.deploy_dapp_contract()
-    print("Deployed")
-    conn.register_user(1, "test1")
-    conn.register_user(2, "test2")
-    conn.register_user(3, "test3")
-    conn.register_user(4, "test4")
-    conn.register_user(5, "test5")
-    conn.register_user(6, "test6")
-    conn.register_user(7, "test7")
-    conn.register_user(8, "test8")
-    time.sleep(5)
-
-    conn.create_acc(1, 2, 10)
-    conn.create_acc(2, 3, 10)
-    conn.create_acc(3, 4, 10)
-    conn.create_acc(4, 5, 10)
-    conn.create_acc(5, 6, 10)
-    conn.create_acc(6, 7, 10)
-    conn.create_acc(7, 8, 10)
-    time.sleep(5)
-
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(0.5)
-    conn.send_amount(1, 8)
-    time.sleep(5)
-    print(conn.get_successful_transactions())
-
-
-    
 
 
 

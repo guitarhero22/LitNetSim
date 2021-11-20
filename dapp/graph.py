@@ -36,7 +36,9 @@ class Graph(object):
     generate_graph()
         Generates the visualization of graph using graphviz
     transactions(num_transactions: int=1000, num_steps: int=100)
-        Generates the transactions that need to be simulated'''
+        Generates the transactions that need to be simulated
+    close_accounts()
+        Closes all accounts'''
 
     def __init__(self, num_nodes: int=100, m: int=2,  num_initial_nodes: int=2, exp_mean: float=10):
         '''Constructor for the Graph class
@@ -78,7 +80,6 @@ class Graph(object):
         for i in range(self.num_initial_nodes):
             for j in range(i+1, self.num_initial_nodes):
                 self.__add_edge(i, j)
-                
 
 
     def __add_edge(self, i: int, j: int):
@@ -139,12 +140,14 @@ class Graph(object):
         
         for node in old_nodes_adj:
             self.__add_edge(node, new_node)
+        
 
     def barabasi_algorithm(self):
         '''Generates a connected graph based on the Barabasi-Albert model'''
         self.__init_barabasi()
         for new_node in range(self.num_initial_nodes, self.num_nodes):
             self.__assign_edges_to_node_barabasi(new_node)
+        self.conn.check_unchecked_transactions()
     
     def generate_graph(self):
         '''Generates a graphviz visualization for the graph'''
@@ -206,8 +209,8 @@ class Graph(object):
         return succ_percentage
     
 
-    def __del__(self):
-        '''Closes all the edges'''
+    def close_acconts(self):
+        '''Closes all the accounts'''
         for i in range(self.num_nodes):
             for j in self.adj_matrix[i]:
                 if j < i:

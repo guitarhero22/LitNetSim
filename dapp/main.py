@@ -9,11 +9,11 @@ def generate_success_chart(result: list, num_transaction: int=1000, num_steps: i
     plt.xlabel("Number of transactions")
     plt.ylabel("Ratio of successful transactions to total transactions")
     plt.title("Ratio of successful to total transactions VS Number of transactions")
-    plt.show()
+    plt.savefig("result/graph")
 
 if __name__ == "__main__":
     print("Deploying Contract")
-    graph = Graph(m=3)
+    graph = Graph()
     print("Initializing nodes")
     graph.init_nodes()
     print("Generating graph")
@@ -24,3 +24,4 @@ if __name__ == "__main__":
         pickle.dump(succ_percentage, fp)
     generate_success_chart(succ_percentage)
     graph.generate_graph()
+    graph.close_acconts()
