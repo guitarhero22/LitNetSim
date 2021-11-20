@@ -6,3 +6,4 @@ solc*
 dapp/credentials.py
 __pycache__
 .python-version
+result/
